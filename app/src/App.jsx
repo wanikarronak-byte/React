@@ -3,6 +3,39 @@ import { useState } from "react";
 function App() {
   const [showLogin, setShowLogin] = useState(false);
 
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const login = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:3000/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Login Successful");
+        console.log(data);
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Server Error");
+    }
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       {!showLogin ? (
@@ -19,7 +52,14 @@ function App() {
           <div>
             <label>Username:</label>
             <br />
-            <input type="text" placeholder="Enter username" />
+            <input
+              type="text"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) =>
+                setUsername(e.target.value)
+              }
+            />
           </div>
 
           <br />
@@ -27,12 +67,21 @@ function App() {
           <div>
             <label>Password:</label>
             <br />
-            <input type="password" placeholder="Enter password" />
+            <input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+            />
           </div>
 
           <br />
 
-          <button>Login</button>
+          <button onClick={login}>
+            Login
+          </button>
         </div>
       )}
     </div>
