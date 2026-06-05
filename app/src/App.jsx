@@ -1,89 +1,79 @@
 import { useState } from "react";
+import Home from "./components/Home";
+import Login from "./components/Login";
+import Products from "./components/Products";
+import Header from "./components/Header";
+
+import "./App.css";
 
 function App() {
-  const [showLogin, setShowLogin] = useState(false);
+  const [showLoginPage, setShowLoginPage] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [products, setProducts] = useState([]);
 
-  const login = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
     try {
-      const response = await fetch(
-        "http://localhost:3000/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username,
-            password,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          password: password.trim(),
+        }),
+      });
 
       const data = await response.json();
 
-      if (response.ok) {
-        alert("Login Successful");
-        console.log(data);
+      if (data.success) {
+        setIsLoggedIn(true);
+
+        const res = await fetch("http://localhost:5000/products");
+        const productData = await res.json();
+
+        setProducts(productData.products);
       } else {
-        alert(data.message);
+        alert("Invalid credentials");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Server Error");
+    } catch (err) {
+      alert("Server error");
     }
   };
 
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setShowLoginPage(false);
+    setUsername("");
+    setPassword("");
+    setProducts([]);
+  };
+
   return (
-    <div style={{ padding: "20px" }}>
-      {!showLogin ? (
-        <>
-          <h1>Welcome to My App</h1>
-          <button onClick={() => setShowLogin(true)}>
-            Sign In
-          </button>
-        </>
-      ) : (
-        <div>
-          <h2>Login Page</h2>
+    <div className="app-container">
 
-          <div>
-            <label>Username:</label>
-            <br />
-            <input
-              type="text"
-              placeholder="Enter username"
-              value={username}
-              onChange={(e) =>
-                setUsername(e.target.value)
-              }
-            />
-          </div>
+      <Header isLoggedIn={isLoggedIn} handleLogout={handleLogout} />
 
-          <br />
-
-          <div>
-            <label>Password:</label>
-            <br />
-            <input
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-            />
-          </div>
-
-          <br />
-
-          <button onClick={login}>
-            Login
-          </button>
-        </div>
+      {!showLoginPage && !isLoggedIn && (
+        <Home setShowLoginPage={setShowLoginPage} />
       )}
+
+      {showLoginPage && !isLoggedIn && (
+        <Login
+          username={username}
+          password={password}
+          setUsername={setUsername}
+          setPassword={setPassword}
+          handleLogin={handleLogin}
+          setShowLoginPage={setShowLoginPage}
+        />
+      )}
+
+      {isLoggedIn && <Products products={products} />}
+
     </div>
   );
 }
