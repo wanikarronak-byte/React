@@ -1,11 +1,14 @@
+import { useNavigate } from "react-router-dom";
+
 function Login({
   username,
   password,
   setUsername,
   setPassword,
   handleLogin,
-  setShowLoginPage,
 }) {
+  const navigate = useNavigate();
+
   return (
     <div className="login-container">
       <form onSubmit={handleLogin}>
@@ -16,18 +19,22 @@ function Login({
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-        /><br />
+        />
+        <br />
 
-        <input type="password"
+        <input
+          type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-<br/>
+        <br />
+
         <button type="submit">Login</button>
+
         <button
           type="button"
-          onClick={() => setShowLoginPage(false)}
+          onClick={() => navigate("/")}
         >
           Back
         </button>
